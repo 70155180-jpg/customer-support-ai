@@ -29,6 +29,7 @@ def home():
 # Classifier Route
 # -------------------------
 @app.post("/classify")
+@app.post("/api/classify")
 def classify_ticket(ticket: Ticket):
     text = ticket.text.lower()
 

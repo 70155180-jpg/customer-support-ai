@@ -5,7 +5,7 @@ function App() {
   const [result, setResult] = useState(null);
 
   const handleSubmit = async () => {
-    const res = await fetch("http://127.0.0.1:8000/classify", {
+    const res = await fetch("/api/classify", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
