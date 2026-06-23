@@ -19,6 +19,20 @@ app.add_middleware(
 class Ticket(BaseModel):
     text: str
 
+
+def build_response(category, agent, priority, confidence, sla, tags, action):
+    return {
+        "ticket_id": f"TICKET-{uuid4().hex[:6].upper()}",
+        "agent": agent,
+        "category": category,
+        "priority": priority,
+        "confidence": confidence,
+        "sla": sla,
+        "tags": tags,
+        "message": f"Your ticket has been assigned to the {agent} for {category} support.",
+        "suggested_reply": action
+    }
+
 # -------------------------
 # Test Route
 # -------------------------
@@ -33,37 +47,64 @@ def home():
 @app.post("/api/classify")
 def classify_ticket(ticket: Ticket):
     text = ticket.text.lower()
-    ticket_id = f"TICKET-{uuid4().hex[:6].upper()}"
 
     if any(word in text for word in ["refund", "payment", "charged", "invoice", "billing"]):
-        category = "billing"
-        agent = "Billing Support Agent"
-        priority = "medium"
+        return build_response(
+            "billing",
+            "Billing Support Agent",
+            "medium",
+            92,
+            "4 hours",
+            ["payment", "refund", "billing"],
+            "Thanks for contacting us. We are reviewing the payment details and will update you shortly."
+        )
     elif any(word in text for word in ["error", "bug", "crash", "not working", "failed"]):
-        category = "technical"
-        agent = "Technical Escalation Agent"
-        priority = "high"
+        return build_response(
+            "technical",
+            "Technical Escalation Agent",
+            "high",
+            89,
+            "2 hours",
+            ["technical", "incident", "needs-review"],
+            "We have escalated this to technical support. Please share screenshots or steps to reproduce the issue."
+        )
     elif any(word in text for word in ["login", "password", "account", "profile"]):
-        category = "account"
-        agent = "Account Support Agent"
-        priority = "medium"
+        return build_response(
+            "account",
+            "Account Support Agent",
+            "medium",
+            87,
+            "4 hours",
+            ["account", "access", "identity"],
+            "We will help you restore account access. Please avoid sharing your password in the ticket."
+        )
     elif any(word in text for word in ["delivery", "shipping", "order", "tracking"]):
-        category = "delivery"
-        agent = "Delivery Support Agent"
-        priority = "medium"
+        return build_response(
+            "delivery",
+            "Delivery Support Agent",
+            "medium",
+            84,
+            "6 hours",
+            ["order", "shipping", "tracking"],
+            "We are checking the order status and tracking details with the delivery team."
+        )
     elif any(word in text for word in ["angry", "complaint", "bad service", "unhappy"]):
-        category = "complaint"
-        agent = "Customer Care Agent"
-        priority = "high"
+        return build_response(
+            "complaint",
+            "Customer Care Agent",
+            "high",
+            86,
+            "1 hour",
+            ["complaint", "customer-care", "urgent"],
+            "We are sorry about this experience. A customer care agent will review it with priority."
+        )
     else:
-        category = "general"
-        agent = "FAQ Agent"
-        priority = "low"
-
-    return {
-        "ticket_id": ticket_id,
-        "agent": agent,
-        "category": category,
-        "priority": priority,
-        "message": f"Your ticket has been assigned to the {agent} for {category} support."
-    }
+        return build_response(
+            "general",
+            "FAQ Agent",
+            "low",
+            72,
+            "12 hours",
+            ["general", "triage"],
+            "Thanks for reaching out. We have received your request and will route it to the right team."
+        )
